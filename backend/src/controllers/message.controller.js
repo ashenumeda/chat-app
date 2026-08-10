@@ -37,6 +37,19 @@ export const sendMessage = async (req, res) => {
         const loggedInUserId = req.user._id;
         const receiverId = req.params.id;
 
+        if (!text && !image) {
+            return res.status(400).json({ message: "Text or image is required" });
+        }
+
+        if (loggedInUserId.toString() === receiverId.toString()) {
+            return res.status(400).json({ message: "You cannot send a message to yourself" });
+        }
+
+        const receiverExists = await User.findById(receiverId);
+        if (!receiverExists) {
+            return res.status(404).json({ message: "Receiver not found" });
+        }
+
         let imageUrl = null;
         if (image) {
             // uplpload base64 image to cloudinary and get the url
